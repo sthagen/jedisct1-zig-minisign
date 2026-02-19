@@ -37,8 +37,12 @@ pub fn build(b: *std.Build) void {
             }),
         });
 
+        const options = b.addOptions();
+        options.addOption([]const u8, "version", @import("build.zig.zon").version);
+
         exe.root_module.addImport("minizign", minizign_module);
         exe.root_module.addImport("clap", clap.module("clap"));
+        exe.root_module.addOptions("build_options", options);
 
         b.installArtifact(exe);
 

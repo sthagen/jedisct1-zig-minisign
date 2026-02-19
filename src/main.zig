@@ -202,8 +202,11 @@ fn getPasswordWithPrompt(allocator: mem.Allocator, io: Io, prompt: []const u8) !
     return password.toOwnedSlice(allocator);
 }
 
+const build_options = @import("build_options");
+
 const params = clap.parseParamsComptime(
     \\ -h, --help                       Display this help and exit
+    \\ -v, --version                    Display version and exit
     \\ -p, --publickey-path <PATH>      Public key path to a file
     \\ -P, --publickey <STRING>         Public key, as a BASE64-encoded string
     \\ -s, --secretkey-path <PATH>      Secret key path to a file
@@ -331,6 +334,11 @@ fn doit(gpa_allocator: mem.Allocator, args: process.Args, environ: process.Envir
     defer res.deinit();
 
     if (res.args.help != 0) usage(io);
+    if (res.args.version != 0) {
+        var stdout_writer = File.stdout().writer(io, &.{});
+        stdout_writer.interface.writeAll("minizign " ++ build_options.version ++ "\n") catch {};
+        process.exit(0);
+    }
     const quiet = res.args.quiet;
     const prehash: ?bool = if (res.args.legacy != 0) null else true;
     const pk_b64 = res.args.publickey;
